@@ -1,0 +1,102 @@
+# This workflow can be invoked only from caller workflow.
+# More information about Reusing workflows - https://docs.github.com/en/actions/using-workflows/reusing-workflows
+
+# Run API tests for Indexers.
+name: "Reusable :: API tests"
+
+on:
+  workflow_call:
+    inputs:
+      liquidity-pools-build-artifact-name:
+        required: true
+        type: string
+      dictionary-build-artifact-name:
+        required: true
+        type: string
+
+jobs:
+  # Run API tests
+  run:
+    name: "Run"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Setup Node.js"
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+
+      - uses: actions/checkout@v2
+
+      # Download artifacts with Liquidity pools indexer build
+      - name: "Download Liquidity pools indexer build"
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ inputs.liquidity-pools-build-artifact-name }}
+          path: ./indexers/liquidity-pools/lib
+
+      - name: "Install Node modules for App"
+        if: steps.cache-node-modules-ui-app.outputs.cache-hit != 'true'
+        run: |
+          npm ci
+
+      # Change CI scripts files permissions to prevent "Permission denied" error.
+      - name: "Change folders permissions"
+        run: chmod -R 777 ./scripts/ci
+
+      - name: "Run DB for liquidity-pools indexer"
+        shell: bash
+        run: |
+          docker compose -f ./indexers/liquidity-pools/docker-compose.yml --env-file -p liquidity_pools .env -d
+
+      - name: "Run DB for storage-dictionary indexer"
+        shell: bash
+        run: |
+          docker compose -f ./indexers/storage-dictionary/docker-compose.yml --env-file -p storage_dictionary .env -d
+
+      - name: "Wait for liquidity-pools DB port :23798"
+        timeout-minutes: 2
+        shell: bash
+        run: . ./scripts/ci/gh-actions-wait-for-port.sh 23798
+
+      - name: "Wait for liquidity-pools DB port :23799"
+        timeout-minutes: 2
+        shell: bash
+        run: . ./scripts/ci/gh-actions-wait-for-port.sh 23799
+
+      - name: "Run liquidity-pools indexer processor"
+        shell: bash
+        run: |
+          cd indexers/liquidity-pools
+          npx squid-typeorm-migration apply
+          node --require=dotenv/config lib/main.js &
+
+      - name: "Run liquidity-pools indexer api"
+        shell: bash
+        run: |
+          cd indexers/liquidity-pools
+          node --require=dotenv/config lib/api.js &
+
+      - name: "Run storage-dictionary indexer"
+        shell: bash
+        run: |
+          cd indexers/storage-dictionary
+          npx squid-typeorm-migration apply
+          node --require=dotenv/config lib/main.js &
+
+      - name: "Run storage-dictionary indexer api"
+        shell: bash
+        run: |
+          cd indexers/liquidity-pools
+          node --require=dotenv/config lib/api.js &
+
+      # Check of storage-dictionary indexer API status
+      - name: "Wait for storage-dictionary indexer API port :8080"
+        timeout-minutes: 1
+        shell: bash
+        run: . ./ui-app/scripts/ci/gh-actions-wait-for-port.sh 8080
+
+      # Check of storage-dictionary indexer API status
+      - name: "Wait for storage-dictionary indexer API port :8090"
+        timeout-minutes: 1
+        shell: bash
+        run: . ./ui-app/scripts/ci/gh-actions-wait-for-port.sh 8090
