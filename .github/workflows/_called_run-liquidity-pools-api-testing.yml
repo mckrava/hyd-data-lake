@@ -25,6 +25,10 @@ jobs:
         with:
           node-version: 20
 
+      - uses: KengoTODA/actions-setup-docker-compose@v1
+        with:
+          version: '2.14.2'
+
       - uses: actions/checkout@v4
 
       # Download artifacts with Liquidity pools indexer build
