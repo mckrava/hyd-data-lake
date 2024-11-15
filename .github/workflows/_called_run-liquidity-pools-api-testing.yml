@@ -38,6 +38,13 @@ jobs:
           name: ${{ inputs.liquidity-pools-build-artifact-name }}
           path: ./indexers/liquidity-pools/lib
 
+      # Download artifacts with Liquidity pools indexer build
+      - name: "Download Storage Dictionary indexer build"
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.dictionary-build-artifact-name }}
+          path: ./indexers/storage-dictionary/lib
+
       - name: "Install Node modules for App"
         if: steps.cache-node-modules-ui-app.outputs.cache-hit != 'true'
         run: |
