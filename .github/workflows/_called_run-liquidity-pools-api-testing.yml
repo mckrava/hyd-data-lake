@@ -57,12 +57,16 @@ jobs:
       - name: "Run DB for liquidity-pools indexer"
         shell: bash
         run: |
+          export DB_NAME=store_dictionary
+          export DB_PORT=23798
           docker compose -f ./indexers/liquidity-pools/docker-compose.yml --env-file ./indexers/liquidity-pools/.env -p liquidity_pools up -d
 
       - name: "Run DB for storage-dictionary indexer"
         shell: bash
         run: |
-          docker compose -f ./indexers/storage-dictionary/docker-compose.yml --env-file ./indexers/storage-dictionary/.env -p storage_dictionary up -d
+          export DB_NAME=squid
+          export DB_PORT=23799
+          docker compose -f ./indexers/storage-dictionary/docker-compose.yml -p storage_dictionary up -d
 
       - name: "Wait for liquidity-pools DB port :23798"
         timeout-minutes: 2
