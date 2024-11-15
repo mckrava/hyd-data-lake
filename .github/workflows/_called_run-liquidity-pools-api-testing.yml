@@ -21,15 +21,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Setup Node.js"
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       # Download artifacts with Liquidity pools indexer build
       - name: "Download Liquidity pools indexer build"
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.liquidity-pools-build-artifact-name }}
           path: ./indexers/liquidity-pools/lib
