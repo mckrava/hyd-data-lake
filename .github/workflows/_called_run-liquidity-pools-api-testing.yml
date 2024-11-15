@@ -59,7 +59,7 @@ jobs:
         run: |
           export DB_NAME=store_dictionary
           export DB_PORT=23798
-          docker compose -f ./indexers/liquidity-pools/docker-compose.yml --env-file ./indexers/liquidity-pools/.env -p liquidity_pools up -d
+          docker compose -f ./indexers/liquidity-pools/docker-compose.yml -p liquidity_pools up -d
 
       - name: "Run DB for storage-dictionary indexer"
         shell: bash
