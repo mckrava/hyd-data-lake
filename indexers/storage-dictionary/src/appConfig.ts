@@ -16,7 +16,7 @@ export class AppConfig {
 
   @Transform(({ value }: { value: string }) => +value)
   @IsNotEmpty()
-  readonly GQL_PORT: number = 8080;
+  readonly GQL_PORT: number = 8090;
 
   readonly BASE_PATH?: string;
 

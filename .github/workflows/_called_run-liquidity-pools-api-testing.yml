@@ -57,14 +57,14 @@ jobs:
       - name: "Run DB for liquidity-pools indexer"
         shell: bash
         run: |
-          export DB_NAME=store_dictionary
+          export DB_NAME=squid
           export DB_PORT=23798
           docker compose -f ./indexers/liquidity-pools/docker-compose.yml -p liquidity_pools up -d
 
       - name: "Run DB for storage-dictionary indexer"
         shell: bash
         run: |
-          export DB_NAME=squid
+          export DB_NAME=store_dictionary
           export DB_PORT=23799
           docker compose -f ./indexers/storage-dictionary/docker-compose.yml -p storage_dictionary up -d
 
@@ -82,6 +82,8 @@ jobs:
         shell: bash
         run: |
           cd indexers/liquidity-pools
+          export DB_NAME=squid
+          export DB_PORT=23798
           npx squid-typeorm-migration apply
           node --require=dotenv/config lib/main.js &
 
@@ -89,12 +91,16 @@ jobs:
         shell: bash
         run: |
           cd indexers/liquidity-pools
+          export DB_NAME=squid
+          export DB_PORT=23798
           node --require=dotenv/config lib/api.js &
 
       - name: "Run storage-dictionary indexer"
         shell: bash
         run: |
           cd indexers/storage-dictionary
+          export DB_NAME=store_dictionary
+          export DB_PORT=23799
           npx squid-typeorm-migration apply
           node --require=dotenv/config lib/main.js &
 
@@ -102,6 +108,8 @@ jobs:
         shell: bash
         run: |
           cd indexers/liquidity-pools
+          export DB_NAME=store_dictionary
+          export DB_PORT=23799
           node --require=dotenv/config lib/api.js &
 
       # Check of storage-dictionary indexer API status
