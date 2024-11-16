@@ -116,10 +116,10 @@ jobs:
       - name: "Wait for storage-dictionary indexer API port :8080"
         timeout-minutes: 1
         shell: bash
-        run: . ./ui-app/scripts/ci/gh-actions-wait-for-port.sh 8080
+        run: . ./scripts/ci/gh-actions-wait-for-port.sh 8080
 
       # Check of storage-dictionary indexer API status
       - name: "Wait for storage-dictionary indexer API port :8090"
         timeout-minutes: 1
         shell: bash
-        run: . ./ui-app/scripts/ci/gh-actions-wait-for-port.sh 8090
+        run: . ./scripts/ci/gh-actions-wait-for-port.sh 8090
