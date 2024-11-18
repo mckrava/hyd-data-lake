@@ -84,6 +84,7 @@ jobs:
           cd indexers/liquidity-pools
           export DB_NAME=squid
           export DB_PORT=23798
+          export CHAIN=hydration
           npx squid-typeorm-migration apply
           node --require=dotenv/config lib/main.js &
 
@@ -93,6 +94,7 @@ jobs:
           cd indexers/liquidity-pools
           export DB_NAME=squid
           export DB_PORT=23798
+          export CHAIN=hydration
           node --require=dotenv/config lib/api.js &
 
       - name: "Run storage-dictionary indexer"
