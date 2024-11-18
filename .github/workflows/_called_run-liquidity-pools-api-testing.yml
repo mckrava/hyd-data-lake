@@ -82,6 +82,8 @@ jobs:
         shell: bash
         run: |
           cd indexers/liquidity-pools
+          export DB_NAME=squid
+          export DB_PORT=23798
           export CHAIN=hydration
           npx squid-typeorm-migration apply
           node --require=dotenv/config lib/main.js &
@@ -97,6 +99,8 @@ jobs:
         shell: bash
         run: |
           cd indexers/storage-dictionary
+          export DB_NAME=store_dictionary
+          export DB_PORT=23799
           npx squid-typeorm-migration apply
           node --require=dotenv/config lib/main.js &
 
