@@ -16,7 +16,7 @@ export class AppConfig {
 
   @Transform(({ value }: { value: string }) => +value)
   @IsNotEmpty()
-  readonly GQL_PORT: number = 8090;
+  readonly GQL_PORT: number = 8080;
 
   readonly BASE_PATH?: string;
 
@@ -71,6 +71,10 @@ export class AppConfig {
   @IsNotEmpty()
   readonly STATE_SCHEMA_NAME: string = 'squid_processor';
 
+  @IsNotEmpty()
+  readonly ASSETS_ACTUALISATION_PROC_STATE_SCHEMA_NAME: string =
+    'squid_processor';
+
   @Transform(({ value }: { value: string }) => value.split(','))
   @IsNotEmpty()
   readonly ALL_STATE_SCHEMAS_LIST: string[] = ['squid_processor'];
@@ -85,6 +89,9 @@ export class AppConfig {
 
   @Transform(({ value }: { value: string }) => +value)
   readonly INDEXER_SUB_PROCESSORS_NUMBER: number = 5;
+
+  @Transform(({ value }: { value: string }) => value === 'true')
+  readonly ASSETS_TRACKER_PROCESSOR: boolean = true;
 
   @Transform(
     ({ value }: { value: string }) =>

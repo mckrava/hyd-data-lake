@@ -9,7 +9,7 @@
     "postinstall": "cpx 'package-lock.json' indexers/liquidity-pools/ && cpx 'package-lock.json' indexers/storage-dictionary/"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=18"
   },
   "packageManager": "npm@10.2.4",
   "workspaces": [
@@ -17,8 +17,5 @@
   ],
   "dependencies": {
     "pg": "^8.13.1"
-  },
-  "resolutions": {
-    "@polkadot/api": "14.2.3"
   }
 }
