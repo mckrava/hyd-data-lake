@@ -15,7 +15,7 @@ const query = `
  * @returns {Promise<string|*>}
  */
 module.exports = async ({ github, context }) => {
-  const { INDEX_FROM_BLOCK, INDEX_TO_BLOCK } = process.env;
+  const { INDEX_FROM_BLOCK, INDEX_TO_BLOCK, PROCESSOR_API_URL } = process.env;
 
   const [owner, repo] = context.payload.repository.full_name.split("/");
 
