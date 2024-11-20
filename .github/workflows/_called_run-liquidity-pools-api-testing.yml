@@ -82,19 +82,21 @@ jobs:
         shell: bash
         run: |
           cd indexers/liquidity-pools
+          export NODE_ENV=test
           export DB_NAME=squid
           export DB_PORT=23798
           export CHAIN=hydration
           export INDEX_FROM_BLOCK=3681427
           export INDEX_TO_BLOCK=3706164
           npx squid-typeorm-migration apply
-          node --require=dotenv/config lib/main.js
+          node --require=dotenv/config lib/main.js &
 
       - name: "Run liquidity-pools indexer api"
         shell: bash
         run: |
           cd indexers/liquidity-pools
           export CHAIN=hydration
+          export NODE_ENV=test
           node --require=dotenv/config lib/api.js &
 
 #      - name: "Run storage-dictionary indexer"
