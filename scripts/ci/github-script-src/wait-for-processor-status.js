@@ -70,5 +70,5 @@ module.exports = async ({ github, context }) => {
   };
 
   // return JSON.stringify(waitingStatus);
-  return waitingStatus;
+  return JSON.stringify(waitingStatus);
 };

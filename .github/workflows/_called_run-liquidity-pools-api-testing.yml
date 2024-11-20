@@ -137,7 +137,7 @@ jobs:
         with:
           # "github-token" parameter is required for work with GitHub API
           #          github-token: ${{ secrets.GITHUB_TOKEN }}
-          #          result-encoding: string
+          result-encoding: json
           script: |
             const script = require('./scripts/ci/github-script-src/wait-for-processor-status.js')
             return await script({github, context, core})
@@ -162,11 +162,11 @@ jobs:
             }
           "
 
-#      - name: 'debug'
-#        if: always()
-#        shell: bash
-#        run: |
-#          echo "liquidity-pools-ind-status result ${{steps.liquidity-pools-ind-status.outputs.result}} | ${{steps.liquidity-pools-ind-status.outputs.result.finished}}"
+      - name: 'debug'
+        if: always()
+        shell: bash
+        run: |
+          echo "liquidity-pools-ind-status result ${{steps.liquidity-pools-ind-status.outputs.result}} | ${{steps.liquidity-pools-ind-status.outputs.result.finished}}"
 
       # Cancel workflow`.
       - name: "Cancel workflow"
