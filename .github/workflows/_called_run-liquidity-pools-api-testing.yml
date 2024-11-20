@@ -143,15 +143,34 @@ jobs:
             return await script({github, context, core})
             
 
-      - name: 'debug'
+      - name: debug
         if: always()
         shell: bash
         run: |
-          echo "liquidity-pools-ind-status result ${{steps.liquidity-pools-ind-status.outputs.result}} | ${{steps.liquidity-pools-ind-status.outputs.result.finished}}"
+          result='${{ steps.liquidity-pools-ind-status.outputs.result }}'
+          echo "Raw Result: $result"
+
+          # Use node to safely parse JSON
+          echo "Parsed JSON:"
+          node -e "
+            try {
+              const jsonString = '$result';
+              const data = JSON.parse(jsonString);
+              console.log(JSON.stringify(data, null, 2));
+            } catch (e) {
+              console.error('Invalid JSON:', e.message);
+            }
+          "
+
+#      - name: 'debug'
+#        if: always()
+#        shell: bash
+#        run: |
+#          echo "liquidity-pools-ind-status result ${{steps.liquidity-pools-ind-status.outputs.result}} | ${{steps.liquidity-pools-ind-status.outputs.result.finished}}"
 
       # Cancel workflow`.
       - name: "Cancel workflow"
-        if: steps.liquidity-pools-ind-status.outputs.result.finished == false
+        if: steps.liquidity-pools-ind-status.outputs.result.finished != true
         uses: styfle/cancel-workflow-action@0.9.1
         with:
           access_token: ${{ secrets.GITHUB_TOKEN }}
