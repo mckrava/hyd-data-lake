@@ -25,11 +25,16 @@ jobs:
         with:
           node-version: 20
 
-      - uses: KengoTODA/actions-setup-docker-compose@v1
-        with:
-          version: "2.14.2"
+#      - uses: KengoTODA/actions-setup-docker-compose@v1
+#        with:
+#          version: "2.14.2"
 
       - uses: actions/checkout@v4
+
+      - name: "Install docker compose"
+        run: |
+          sudo apt-get update
+          sudo apt-get install docker-compose-plugin
 
       # Download artifacts with Liquidity pools indexer build
       - name: "Download Liquidity pools indexer build"
@@ -141,36 +146,11 @@ jobs:
           script: |
             const script = require('./scripts/ci/github-script-src/wait-for-processor-status.js')
             return await script({github, context, core})
-            
-
-      - name: debug
-        if: always()
-        shell: bash
-        run: |
-          result='${{ steps.liquidity-pools-ind-status.outputs.result }}'
-          echo "Raw Result: $result"
-
-          # Use node to safely parse JSON
-          echo "Parsed JSON:"
-          node -e "
-            try {
-              const jsonString = '$result';
-              const data = JSON.parse(jsonString);
-              console.log(JSON.stringify(data, null, 2));
-            } catch (e) {
-              console.error('Invalid JSON:', e.message);
-            }
-          "
-
-      - name: 'debug'
-        if: always()
-        shell: bash
-        run: |
-          echo "liquidity-pools-ind-status result ${{steps.liquidity-pools-ind-status.outputs.result}} | ${{steps.liquidity-pools-ind-status.outputs.result.finished}}"
 
       # Cancel workflow`.
       - name: "Cancel workflow"
-        if: steps.liquidity-pools-ind-status.outputs.result.finished != true
+#        if: steps.liquidity-pools-ind-status.outputs.result.finished != true
+        if: fromJson(steps.liquidity-pools-ind-status.outputs.result).finished != true
         uses: styfle/cancel-workflow-action@0.9.1
         with:
           access_token: ${{ secrets.GITHUB_TOKEN }}
