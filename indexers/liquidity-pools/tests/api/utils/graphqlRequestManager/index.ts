@@ -30,6 +30,11 @@ export class GraphQLRequestManager extends QueriesHelper {
       },
     });
 
+    console.log('getLbpPoolHistoricalDatumAtBlock :: resp')
+    console.dir(resp.error?.message, {depth: null})
+    console.dir(resp.error?.graphQLErrors, {depth: null})
+    console.dir(resp.data, {depth: null})
+
     return resp.data?.lbpPoolHistoricalData?.nodes[0] ?? null;
   }
 }

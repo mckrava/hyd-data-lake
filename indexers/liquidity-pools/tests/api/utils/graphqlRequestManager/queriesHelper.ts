@@ -26,6 +26,8 @@ export class QueriesHelper {
       retryIf: (err: any) => err && err.networkError,
     };
 
+    console.log('this.gqlClientUrl - ', this.gqlClientUrl)
+
     const client = new GqlClient({
       url: this.gqlClientUrl,
       exchanges: [fetchExchange, retryExchange(retryOptions)],
