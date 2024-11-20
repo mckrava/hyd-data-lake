@@ -42,7 +42,6 @@ export async function handleLbpPools(
     await lpbPoolUpdated(ctx, eventData);
   }
 
-  console.log('ctx.batchState.state.lbpPoolIdsToSave - ', ctx.batchState.state.lbpPoolIdsToSave.size)
 
   await ctx.store.save(
     [...ctx.batchState.state.lbpAllBatchPools.values()].filter((pool) =>

@@ -109,7 +109,6 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
     ctxWithBatchState as ProcessorContext<Store>,
     parsedData
   );
-  console.timeEnd('handleLbpPoolHistoricalData');
 
   timeMes.end = Date.now();
   console.log('Batch complete - ', timeMes);

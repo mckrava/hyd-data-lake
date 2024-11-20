@@ -136,11 +136,25 @@ jobs:
           PROCESSOR_API_URL: "http://127.0.0.1:8080/graphql"
         with:
           # "github-token" parameter is required for work with GitHub API
-          #          github-token: ${{ secrets.GH_TOKEN }}
+          #          github-token: ${{ secrets.GITHUB_TOKEN }}
           #          result-encoding: string
           script: |
             const script = require('./scripts/ci/github-script-src/wait-for-processor-status.js')
             return await script({github, context, core})
+            
+
+      - name: 'debug'
+        if: always()
+        shell: bash
+        run: |
+          echo "liquidity-pools-ind-status result ${{steps.liquidity-pools-ind-status.outputs.result}} | ${{steps.liquidity-pools-ind-status.outputs.result.finished}}"
+
+      # Cancel workflow`.
+      - name: "Cancel workflow"
+        if: steps.liquidity-pools-ind-status.outputs.result.finished == false
+        uses: styfle/cancel-workflow-action@0.9.1
+        with:
+          access_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 'Run API tests for liquidity-pools'
         shell: bash
@@ -152,17 +166,4 @@ jobs:
         run: |
           cd indexers/liquidity-pools
           npm run test:api
-          
-
-      - name: 'debug'
-        if: always()
-        shell: bash
-        run: |
-          echo "liquidity-pools-ind-status result ${{steps.liquidity-pools-ind-status.outputs.result}}"
-
-      # Cancel workflow`.
-      - name: "Cancel workflow"
-        if: steps.liquidity-pools-ind-status.outputs.result.finished == false
-        uses: styfle/cancel-workflow-action@0.9.1
-        with:
-          access_token: ${{ secrets.GH_TOKEN }}
+        

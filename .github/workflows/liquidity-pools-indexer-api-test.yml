@@ -23,7 +23,7 @@ jobs:
       liquidity-pools-build-artifact-name: liquidity-pools-build-files
       dictionary-build-artifact-name: dictionary-build-files
     secrets:
-      gh_token: ${{ secrets.GH_TOKEN }}
+      gh_token: ${{ secrets.GITHUB_TOKEN }}
 
   # Run API tests for indexers
   indexers-api-tests:
