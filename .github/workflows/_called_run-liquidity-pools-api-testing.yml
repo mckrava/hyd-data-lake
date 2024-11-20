@@ -4,6 +4,10 @@
 # Run API tests for Indexers.
 name: "Reusable :: API tests"
 
+permissions:
+  actions: write
+  contents: read
+
 on:
   workflow_call:
     inputs:
