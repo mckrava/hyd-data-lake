@@ -76,7 +76,7 @@ jobs:
           -e POSTGRES_DB=squid \
           -e POSTGRES_PASSWORD=postgres \
           --shm-size=1gb \
-          -p ${DB_PORT}:5432 \
+          -p 23798:5432 \
           postgres:15
 
 #      - name: "Run DB for storage-dictionary indexer"
@@ -103,6 +103,9 @@ jobs:
           export NODE_ENV=test
           export DB_NAME=squid
           export DB_PORT=23798
+          export DB_HOST=127.0.0.1
+          export DB_PASS=postgres
+          export DB_USER=postgres
           export CHAIN=hydration
           export INDEX_FROM_BLOCK=3681427
           export INDEX_TO_BLOCK=3706164
