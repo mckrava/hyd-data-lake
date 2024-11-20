@@ -119,10 +119,10 @@ jobs:
         run: . ./scripts/ci/gh-actions-wait-for-port.sh 8080
 
       # Check of storage-dictionary indexer API status
-      - name: "Wait for storage-dictionary indexer API port :8090"
-        timeout-minutes: 1
-        shell: bash
-        run: . ./scripts/ci/gh-actions-wait-for-port.sh 8090
+#      - name: "Wait for storage-dictionary indexer API port :8090"
+#        timeout-minutes: 1
+#        shell: bash
+#        run: . ./scripts/ci/gh-actions-wait-for-port.sh 8090
 
       - name: "Run github-script to wait for liquidity-pools indexer reached the end of testing range"
         id: liquidity-pools-ind-status
