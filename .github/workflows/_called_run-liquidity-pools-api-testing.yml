@@ -85,8 +85,8 @@ jobs:
           export DB_NAME=squid
           export DB_PORT=23798
           export CHAIN=hydration
-          export INDEX_FROM_BLOCK=3640100
-          export INDEX_TO_BLOCK=3680100
+          export INDEX_FROM_BLOCK=3681427
+          export INDEX_TO_BLOCK=3706164
           npx squid-typeorm-migration apply
           node --require=dotenv/config lib/main.js &
 
@@ -97,23 +97,23 @@ jobs:
           export CHAIN=hydration
           node --require=dotenv/config lib/api.js &
 
-      - name: "Run storage-dictionary indexer"
-        shell: bash
-        run: |
-          cd indexers/storage-dictionary
-          export DB_NAME=store_dictionary
-          export DB_PORT=23799
-          npx squid-typeorm-migration apply
-          node --require=dotenv/config lib/main.js &
+#      - name: "Run storage-dictionary indexer"
+#        shell: bash
+#        run: |
+#          cd indexers/storage-dictionary
+#          export DB_NAME=store_dictionary
+#          export DB_PORT=23799
+#          npx squid-typeorm-migration apply
+#          node --require=dotenv/config lib/main.js &
+#
+#      - name: "Run storage-dictionary indexer api"
+#        shell: bash
+#        run: |
+#          cd indexers/storage-dictionary
+#          node --require=dotenv/config lib/api.js &
 
-      - name: "Run storage-dictionary indexer api"
-        shell: bash
-        run: |
-          cd indexers/storage-dictionary
-          node --require=dotenv/config lib/api.js &
-
-      # Check of storage-dictionary indexer API status
-      - name: "Wait for storage-dictionary indexer API port :8080"
+      # Check of liquidity-pools indexer API status
+      - name: "Wait for liquidity-pools indexer API port :8080"
         timeout-minutes: 1
         shell: bash
         run: . ./scripts/ci/gh-actions-wait-for-port.sh 8080
@@ -129,8 +129,8 @@ jobs:
         uses: actions/github-script@v7
         env:
           # Env variables
-          INDEX_FROM_BLOCK: 3640100
-          INDEX_TO_BLOCK: 3680100
+          INDEX_FROM_BLOCK: 3681427
+          INDEX_TO_BLOCK: 3706164
           PROCESSOR_API_URL: "http://127.0.0.1:8080/graphql"
         with:
           # "github-token" parameter is required for work with GitHub API
@@ -140,11 +140,23 @@ jobs:
             const script = require('./scripts/ci/github-script-src/wait-for-processor-status.js')
             return await script({github, context, core})
 
+      - name: 'Run API tests for liquidity-pools'
+        shell: bash
+        env:
+          CI_NODE_ENV: test
+          CI_LIQUIDITY_POOLS_API_URL: "http://127.0.0.1:8080/graphql"
+          CI_INDEX_FROM_BLOCK: 3681427
+          CI_INDEX_TO_BLOCK: 3706164
+        run: |
+          cd indexers/liquidity-pools
+          npm run test:api
+          
+
       - name: 'debug'
         if: always()
         shell: bash
         run: |
-          echo steps.liquidity-pools-ind-status.outputs.result
+          echo "liquidity-pools-ind-status result ${{steps.liquidity-pools-ind-status.outputs.result}}"
 
       # Cancel workflow`.
       - name: "Cancel workflow"

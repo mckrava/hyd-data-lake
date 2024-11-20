@@ -13,8 +13,9 @@
     "deploy-main": "sqd deploy --org galacticcouncil . -m deployment-xyk-pools-indexer.yaml",
     "ingester-codegen:all": ". ./scripts/ingester-codegen.sh",
     "multi-typegen": ". ./scripts/typegen.sh",
-    "dictionary-api-codegen": "graphql-codegen --require dotenv/config --config dictionaryGqlTypesConfig/codegen-dictionary-common.ts",
-    "test:api": "jest --config tests/api/jest-api.json"
+    "api-codegen:dictionary-api": "graphql-codegen --require dotenv/config --config dictionaryGqlTypesConfig/codegen-dictionary-common.ts",
+    "api-codegen:api-tests": "graphql-codegen --require dotenv/config --config dictionaryGqlTypesConfig/codegen-api-tests.ts",
+    "test:api": "NODE_ENV=test jest --config tests/api/jest-api.js --verbose --runInBand"
   },
   "dependencies": {
     "@galacticcouncil/sdk": "^4.2.1",
@@ -55,6 +56,7 @@
     "@polkadot/rpc-augment": "^12.1.1",
     "@polkadot/rpc-core": "^12.1.1",
     "@polkadot/rpc-provider": "^12.1.1",
+    "@polkadot/typegen": "^14.3.1",
     "@polkadot/types": "^12.1.1",
     "@polkadot/types-augment": "^12.1.1",
     "@polkadot/types-codec": "^12.1.1",
