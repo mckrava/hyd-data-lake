@@ -97,9 +97,10 @@ jobs:
 
       - name: "Run DB for liquidity-pools indexer"
         shell: bash
+        env:
+          DB_NAME: squid
+          DB_PORT: ${{ env.LIQ_POOLS_INDEXER_DB_PORT }}
         run: |
-          export DB_NAME=squid
-          export DB_PORT=$LIQ_POOLS_INDEXER_DB_PORT
           docker run -d \
           --name liquidity_pools \
           -e POSTGRES_DB=squid \
@@ -111,12 +112,13 @@ jobs:
       - name: "Run DB for storage-dictionary"
         if: ${{ inputs.is-liq-pools-indexer-with-dictionary }}
         shell: bash
+        env:
+          DB_NAME: store_dictionary
+          DB_PORT: ${{ env.STORAGE_DICT_DB_PORT }}
         run: |
-          export DB_NAME=store_dictionary
-          export DB_PORT=$STORAGE_DICT_DB_PORT
           docker run -d \
-          --name storage_dict \
-          -e POSTGRES_DB=squid \
+          --name store_dictionary \
+          -e POSTGRES_DB=store_dictionary \
           -e POSTGRES_PASSWORD=postgres \
           --shm-size=1gb \
           -p ${DB_PORT}:5432 \
