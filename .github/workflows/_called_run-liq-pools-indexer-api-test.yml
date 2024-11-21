@@ -1,0 +1,278 @@
+# This workflow can be invoked only from caller workflow.
+# More information about Reusing workflows - https://docs.github.com/en/actions/using-workflows/reusing-workflows
+
+# Run API tests for Indexers.
+name: "Reusable :: API test :: Liq.pools indexer with dictionary"
+
+on:
+  workflow_call:
+    inputs:
+      working-chain:
+        required: false
+        type: string
+        default: hydration
+      liq-pools-indexer-is-with-dictionary:
+        required: true
+        type: boolean
+      liq-pools-indexer-from-block:
+        required: true
+        type: number
+      liq-pools-indexer-to-block:
+        required: true
+        type: number
+      storage-dictionary-from-block:
+        required: false
+        type: number
+      storage-dictionary-to-block:
+        required: false
+        type: number
+      process-lbp-pools:
+        required: true
+        type: boolean
+      process-xyk-pools:
+        required: true
+        type: boolean
+      process-omnipools:
+        required: true
+        type: boolean
+      process-stablepools:
+        required: true
+        type: boolean
+      liquidity-pools-build-artifact-name:
+        required: true
+        type: string
+      dictionary-build-artifact-name:
+        required: true
+        type: string
+
+env:
+  LIQ_POOLS_INDEXER_DB_PORT: 23798
+  LIQ_POOLS_INDEXER_API_PORT: 8080
+
+  LIQ_POOLS_INDEXER_FROM_BLOCK: ${{ inputs.liq-pools-indexer-from-block }}
+  LIQ_POOLS_INDEXER_TO_BLOCK: ${{ inputs.liq-pools-indexer-to-block }}
+
+  STORAGE_DICT_DB_PORT: 23799
+  STORAGE_DICT_API_PORT: 8090
+
+  STORAGE_DICT_INDEXER_FROM_BLOCK: ${{ inputs.storage-dictionary-from-block || inputs.liq-pools-indexer-from-block }}
+  STORAGE_DICT_INDEXER_TO_BLOCK: ${{ inputs.storage-dictionary-to-block || inputs.liq-pools-indexer-to-block }}
+
+jobs:
+  # Run API tests
+  run:
+    name: "Run"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/checkout@v4
+
+      # Download artifacts with Liquidity pools indexer build
+      - name: "Download Liquidity pools indexer build"
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.liquidity-pools-build-artifact-name }}
+          path: ./indexers/liquidity-pools/lib
+
+      # Download artifacts with Liquidity pools indexer build
+      - name: "Download Storage Dictionary indexer build"
+        if: ${{ inputs.liq-pools-indexer-is-with-dictionary }}
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.dictionary-build-artifact-name }}
+          path: ./indexers/storage-dictionary/lib
+
+      - name: "Install Node modules for App"
+        if: steps.cache-node-modules-ui-app.outputs.cache-hit != 'true'
+        run: |
+          npm ci
+
+      # Change CI scripts files permissions to prevent "Permission denied" error.
+      - name: "Change folders permissions"
+        run: chmod -R 777 ./scripts/ci
+
+      - name: "Run DB for liquidity-pools indexer"
+        shell: bash
+        run: |
+          export DB_NAME=squid
+          export DB_PORT=$LIQ_POOLS_INDEXER_DB_PORT
+          docker run -d \
+          --name liquidity_pools \
+          -e POSTGRES_DB=squid \
+          -e POSTGRES_PASSWORD=postgres \
+          --shm-size=1gb \
+          -p ${DB_PORT}:5432 \
+          postgres:15
+
+      - name: "Run DB for storage-dictionary"
+        if: ${{ inputs.liq-pools-indexer-is-with-dictionary }}
+        shell: bash
+        run: |
+          export DB_NAME=squid
+          export DB_PORT=$STORAGE_DICT_DB_PORT
+          docker run -d \
+          --name storage_dict \
+          -e POSTGRES_DB=squid \
+          -e POSTGRES_PASSWORD=postgres \
+          --shm-size=1gb \
+          -p ${DB_PORT}:5432 \
+          postgres:15
+
+      - name: "Wait for liquidity-pools DB port"
+        timeout-minutes: 2
+        shell: bash
+        run: . ./scripts/ci/gh-actions-wait-for-port.sh $LIQ_POOLS_INDEXER_DB_PORT
+
+      - name: "Wait for storage dictionary DB port"
+        if: ${{ inputs.liq-pools-indexer-is-with-dictionary }}
+        timeout-minutes: 2
+        shell: bash
+        run: . ./scripts/ci/gh-actions-wait-for-port.sh $STORAGE_DICT_DB_PORT
+
+      - name: "Run storage dictionary processor"
+        if: ${{ inputs.liq-pools-indexer-is-with-dictionary }}
+        shell: bash
+        working-directory: ./indexers/storage-dictionary
+        env:
+          NODE_ENV: test
+          CHAIN: ${{ inputs.working-chain }}
+          DB_NAME: squid
+          DB_PORT:  ${{ env.STORAGE_DICT_DB_PORT }}
+          GQL_PORT: ${{ env.STORAGE_DICT_API_PORT }}
+          START_BLOCK: ${{ env.STORAGE_DICT_INDEXER_FROM_BLOCK }}
+          END_BLOCK: ${{ env.STORAGE_DICT_INDEXER_TO_BLOCK }}
+          PROCESS_LBP_POOLS: ${{ inputs.process-lbp-pools }}
+          PROCESS_XYK_POOLS: ${{ inputs.process-xyk-pools }}
+          PROCESS_OMNIPOOLS: ${{ inputs.process-omnipools }}
+          PROCESS_STABLEPOOLS: ${{ inputs.process-stablepools }}
+        run: |
+#          cd indexers/storage-dictionary
+          sleep 5s
+#          export NODE_ENV=test
+#          export DB_NAME=squid
+#          export DB_PORT=$STORAGE_DICT_DB_PORT
+#          export GQL_PORT=$STORAGE_DICT_API_PORT
+#          export CHAIN=hydration
+#          export START_BLOCK=$STORAGE_DICT_INDEXER_FROM_BLOCK
+#          export END_BLOCK=$STORAGE_DICT_INDEXER_TO_BLOCK
+#          export PROCESS_LBP_POOLS=$PROCESS_LBP_POOLS
+#          export PROCESS_XYK_POOLS=$PROCESS_XYK_POOLS
+#          export PROCESS_OMNIPOOLS=$PROCESS_OMNIPOOLS
+#          export PROCESS_STABLEPOOLS=$PROCESS_STABLEPOOLS
+          npx squid-typeorm-migration apply
+          node --require=dotenv/config lib/main.js &
+
+      - name: "Run storage-dictionary indexer api"
+        if: ${{ inputs.liq-pools-indexer-is-with-dictionary }}
+        shell: bash
+        env:
+          NODE_ENV: test
+          CHAIN: ${{ inputs.working-chain }}
+          GQL_PORT: ${{ env.STORAGE_DICT_API_PORT }}
+        working-directory: ./indexers/storage-dictionary
+        run: |
+#          cd indexers/storage-dictionary
+#          export CHAIN=hydration
+#          export NODE_ENV=test
+#          export GQL_PORT=$STORAGE_DICT_API_PORT
+          node --require=dotenv/config lib/api.js &
+
+      # Check of storage-dictionary indexer API status
+      - name: "Wait for storage-dictionary indexer API port"
+        if: ${{ inputs.liq-pools-indexer-is-with-dictionary }}
+        timeout-minutes: 1
+        shell: bash
+        run: . ./scripts/ci/gh-actions-wait-for-port.sh $STORAGE_DICT_API_PORT
+
+      - name: "Wait for storage-dictionary indexer reached the end of testing range"
+        if: ${{ inputs.liq-pools-indexer-is-with-dictionary }}
+        id: storage-dictionary-ind-status
+        uses: actions/github-script@v7
+        env:
+          # Env variables
+          INDEX_FROM_BLOCK: ${{ env.STORAGE_DICT_INDEXER_FROM_BLOCK }}
+          INDEX_TO_BLOCK: ${{ env.STORAGE_DICT_INDEXER_TO_BLOCK }}
+          PROCESSOR_API_URL: "http://127.0.0.1:${{ env.STORAGE_DICT_API_PORT }}/graphql"
+        with:
+          result-encoding: string
+          script: |
+            const script = require('./scripts/ci/github-script-src/wait-for-processor-status.js')
+            return await script({github, context, core})
+
+#      TODO add condition to cancel workflow if storage-dictionary-ind-status script finished with un-success result
+
+      - name: "Run liquidity-pools indexer processor"
+        shell: bash
+        working-directory: ./indexers/liquidity-pools
+        env:
+          NODE_ENV: test
+          CHAIN: ${{ inputs.working-chain }}
+          DB_NAME: squid
+          DB_PORT: ${{ env.LIQ_POOLS_INDEXER_DB_PORT }}
+          GQL_PORT: ${{ env.LIQ_POOLS_INDEXER_API_PORT }}
+          INDEX_FROM_BLOCK: ${{ env.LIQ_POOLS_INDEXER_FROM_BLOCK }}
+          INDEX_TO_BLOCK: ${{ env.LIQ_POOLS_INDEXER_TO_BLOCK }}
+          PROCESS_LBP_POOLS: ${{ inputs.process-lbp-pools }}
+          PROCESS_XYK_POOLS: ${{ inputs.process-xyk-pools }}
+          PROCESS_OMNIPOOLS: ${{ inputs.process-omnipools }}
+          PROCESS_STABLEPOOLS: ${{ inputs.process-stablepools }}
+        run: |
+#          cd indexers/liquidity-pools
+          sleep 10s
+#          export NODE_ENV=test
+#          export DB_NAME=squid
+#          export DB_PORT=$LIQ_POOLS_INDEXER_DB_PORT
+#          export GQL_PORT=$LIQ_POOLS_INDEXER_API_PORT
+#          export CHAIN=hydration
+#          export INDEX_FROM_BLOCK=$LIQ_POOLS_INDEXER_FROM_BLOCK
+#          export INDEX_TO_BLOCK=$LIQ_POOLS_INDEXER_TO_BLOCK
+          npx squid-typeorm-migration apply
+          node --require=dotenv/config lib/main.js &
+
+      - name: "Run liquidity-pools indexer api"
+        shell: bash
+        env:
+          NODE_ENV: test
+          CHAIN: ${{ inputs.working-chain }}
+          GQL_PORT: ${{ env.LIQ_POOLS_INDEXER_API_PORT }}
+        working-directory: ./indexers/liquidity-pools
+        run: |
+#          cd indexers/liquidity-pools
+#          export CHAIN=hydration
+#          export NODE_ENV=test
+          node --require=dotenv/config lib/api.js &
+
+      # Check of liquidity-pools indexer API status
+      - name: "Wait for liquidity-pools indexer API port"
+        timeout-minutes: 1
+        shell: bash
+        run: . ./scripts/ci/gh-actions-wait-for-port.sh $LIQ_POOLS_INDEXER_API_PORT
+
+      - name: "Run github-script to wait for liquidity-pools indexer reached the end of testing range"
+        id: liquidity-pools-ind-status
+        uses: actions/github-script@v7
+        env:
+          # Env variables
+          INDEX_FROM_BLOCK: ${{ env.LIQ_POOLS_INDEXER_FROM_BLOCK }}
+          INDEX_TO_BLOCK: ${{ env.LIQ_POOLS_INDEXER_TO_BLOCK }}
+          PROCESSOR_API_URL: "http://127.0.0.1:${{ env.LIQ_POOLS_INDEXER_API_PORT }}/graphql"
+        with:
+          result-encoding: string
+          script: |
+            const script = require('./scripts/ci/github-script-src/wait-for-processor-status.js')
+            return await script({github, context, core})
+
+      - name: "Run API tests for liquidity-pools"
+        shell: bash
+        env:
+          CI_NODE_ENV: test
+          CI_LIQUIDITY_POOLS_API_URL: "http://127.0.0.1:${{ env.LIQ_POOLS_INDEXER_API_PORT }}/graphql"
+          CI_INDEX_FROM_BLOCK: ${{ env.LIQ_POOLS_INDEXER_FROM_BLOCK }}
+          CI_INDEX_TO_BLOCK: ${{ env.LIQ_POOLS_INDEXER_TO_BLOCK }}
+        run: |
+          cd indexers/liquidity-pools
+          npm run test:api

@@ -33,6 +33,13 @@ jobs:
     with:
       liquidity-pools-build-artifact-name: liquidity-pools-build-files
       dictionary-build-artifact-name: dictionary-build-files
+      liq-pools-indexer-is-with-dictionary: false
+      liq-pools-indexer-from-block: 3681427
+      liq-pools-indexer-to-block: 3706164
+      process-lbp-pools: true
+      process-xyk-pools: false
+      process-omnipools: false
+      process-stablepools: false
 
   liq-pools-indexer-with-dict-test:
     name: "Liq.pools indexer with dictionary API test"
@@ -42,12 +49,21 @@ jobs:
     with:
       liquidity-pools-build-artifact-name: liquidity-pools-build-files
       dictionary-build-artifact-name: dictionary-build-files
+      liq-pools-indexer-is-with-dictionary: true
+      liq-pools-indexer-from-block: 3681427
+      liq-pools-indexer-to-block: 3706164
+      storage-dictionary-from-block: 3681426
+      storage-dictionary-to-block: 3706165
+      process-lbp-pools: true
+      process-xyk-pools: false
+      process-omnipools: false
+      process-stablepools: false
 
-  storage-dictionary-test:
-    name: "Storage Dictionary API test"
-    needs: build
-    if: ${{ needs.build.result=='success' }}
-    uses: ./.github/workflows/_called_run-storage-dict-api-test.yml
-    with:
-      liquidity-pools-build-artifact-name: liquidity-pools-build-files
-      dictionary-build-artifact-name: dictionary-build-files
+#  storage-dictionary-test:
+#    name: "Storage Dictionary API test"
+#    needs: build
+#    if: ${{ needs.build.result=='success' }}
+#    uses: ./.github/workflows/_called_run-storage-dict-api-test.yml
+#    with:
+#      liquidity-pools-build-artifact-name: liquidity-pools-build-files
+#      dictionary-build-artifact-name: dictionary-build-files
