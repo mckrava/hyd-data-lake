@@ -112,7 +112,7 @@ jobs:
         if: ${{ inputs.is-liq-pools-indexer-with-dictionary }}
         shell: bash
         run: |
-          export DB_NAME=squid
+          export DB_NAME=store_dictionary
           export DB_PORT=$STORAGE_DICT_DB_PORT
           docker run -d \
           --name storage_dict \
