@@ -127,11 +127,11 @@ jobs:
         shell: bash
         run: . ./scripts/ci/gh-actions-wait-for-port.sh $LIQ_POOLS_INDEXER_DB_PORT
 
-      - name: "Wait for storage dictionary DB port"
+#      - name: "Wait for storage dictionary DB port"
 #        if: ${{ inputs.is-liq-pools-indexer-with-dictionary }}
-        timeout-minutes: 2
-        shell: bash
-        run: . ./scripts/ci/gh-actions-wait-for-port.sh $STORAGE_DICT_DB_PORT
+#        timeout-minutes: 2
+#        shell: bash
+#        run: . ./scripts/ci/gh-actions-wait-for-port.sh $STORAGE_DICT_DB_PORT
 
       - name: "Run storage dictionary processor"
         if: ${{ inputs.is-liq-pools-indexer-with-dictionary }}
