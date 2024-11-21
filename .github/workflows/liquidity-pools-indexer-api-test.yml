@@ -25,43 +25,29 @@ jobs:
     secrets:
       gh_token: ${{ secrets.GITHUB_TOKEN }}
 
-  run-api-tests:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        workflow: [_called_run-liq-pools-indexer-api-no-dict-test.yml, _called_run-liq-pools-indexer-api-with-dict-test.yml, _called_run-storage-dict-api-test.yml]
-    steps:
-      - name: Call ${{ matrix.workflow }}
-        uses: ./.github/workflows/${{ matrix.workflow }}
-        with:
-          liquidity-pools-build-artifact-name: "liquidity-pools-build-files"
-          dictionary-build-artifact-name: "dictionary-build-files"
+  liq-pools-indexer-no-dict-test:
+    name: "Liq.pools indexer with no dictionary API test"
+    needs: build
+    if: ${{ needs.build.result=='success' }}
+    uses: ./.github/workflows/_called_run-liq-pools-indexer-api-no-dict-test.yml
+    with:
+      liquidity-pools-build-artifact-name: liquidity-pools-build-files
+      dictionary-build-artifact-name: dictionary-build-files
 
-#  trigger-called-workflows:
-#    runs-on: ubuntu-latest
-#    strategy:
-#      matrix:
-#        workflow: [ _called_run-liq-pools-indexer-api-no-dict-test.yml ] # Called workflows
-#    steps:
-#      - name: Trigger ${{ matrix.workflow }}
-#        uses: actions/github-script@v7
-#        with:
-#          github-token: ${{ secrets.GITHUB_TOKEN }}
-#          script: |
-#            await github.actions.createWorkflowDispatch({
-#              owner: context.repo.owner,
-#              repo: context.repo.repo,
-#              workflow_id: ${{ matrix.workflow }},
-#              ref: 'main',
-#            });
+  liq-pools-indexer-with-dict-test:
+    name: "Liq.pools indexer with dictionary API test"
+    needs: build
+    if: ${{ needs.build.result=='success' }}
+    uses: ./.github/workflows/_called_run-liq-pools-indexer-api-with-dict-test.yml
+    with:
+      liquidity-pools-build-artifact-name: liquidity-pools-build-files
+      dictionary-build-artifact-name: dictionary-build-files
 
-#  # Run API tests for indexers
-#  liq-pools-indexer-no-dict-test:
-#    name: " API tests"
-#    needs: build
-#    if: ${{ needs.build.result=='success' }}
-#    uses: ./.github/workflows/_called_run-liq-pools-indexer-api-no-dict-test.yml
-#    with:
-#      liquidity-pools-build-artifact-name: liquidity-pools-build-files
-#      dictionary-build-artifact-name: dictionary-build-files
-#
+  storage-dictionary-test:
+    name: "Storage Dictionary API test"
+    needs: build
+    if: ${{ needs.build.result=='success' }}
+    uses: ./.github/workflows/_called_run-storage-dict-api-test.yml
+    with:
+      liquidity-pools-build-artifact-name: liquidity-pools-build-files
+      dictionary-build-artifact-name: dictionary-build-files
