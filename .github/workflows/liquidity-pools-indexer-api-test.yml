@@ -25,15 +25,15 @@ jobs:
     secrets:
       gh_token: ${{ secrets.GITHUB_TOKEN }}
 
-  liq-pools-indexer-no-dict-test:
+  liq-pools-indexer-with-no-dict-test:
     name: "Liq.pools indexer with no dictionary API test"
     needs: build
     if: ${{ needs.build.result=='success' }}
-    uses: ./.github/workflows/_called_run-liq-pools-indexer-api-no-dict-test.yml
+    uses: ./.github/workflows/_called_run-liq-pools-indexer-api-dict-test.yml
     with:
       liquidity-pools-build-artifact-name: liquidity-pools-build-files
       dictionary-build-artifact-name: dictionary-build-files
-      liq-pools-indexer-is-with-dictionary: false
+      is-liq-pools-indexer-with-dictionary: false
       liq-pools-indexer-from-block: 3681427
       liq-pools-indexer-to-block: 3706164
       process-lbp-pools: true
@@ -45,11 +45,11 @@ jobs:
     name: "Liq.pools indexer with dictionary API test"
     needs: build
     if: ${{ needs.build.result=='success' }}
-    uses: ./.github/workflows/_called_run-liq-pools-indexer-api-with-dict-test.yml
+    uses: ./.github/workflows/_called_run-liq-pools-indexer-api-test.yml
     with:
       liquidity-pools-build-artifact-name: liquidity-pools-build-files
       dictionary-build-artifact-name: dictionary-build-files
-      liq-pools-indexer-is-with-dictionary: true
+      is-liq-pools-indexer-with-dictionary: true
       liq-pools-indexer-from-block: 3681427
       liq-pools-indexer-to-block: 3706164
       storage-dictionary-from-block: 3681426

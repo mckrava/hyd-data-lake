@@ -11,7 +11,7 @@ on:
         required: false
         type: string
         default: hydration
-      liq-pools-indexer-is-with-dictionary:
+      is-liq-pools-indexer-with-dictionary:
         required: true
         type: boolean
       liq-pools-indexer-from-block:
@@ -80,7 +80,7 @@ jobs:
 
       # Download artifacts with Liquidity pools indexer build
       - name: "Download Storage Dictionary indexer build"
-        if: ${{ inputs.liq-pools-indexer-is-with-dictionary }}
+        if: ${{ inputs.is-liq-pools-indexer-with-dictionary }}
         uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.dictionary-build-artifact-name }}
@@ -109,7 +109,7 @@ jobs:
           postgres:15
 
       - name: "Run DB for storage-dictionary"
-        if: ${{ inputs.liq-pools-indexer-is-with-dictionary }}
+        if: ${{ inputs.is-liq-pools-indexer-with-dictionary }}
         shell: bash
         run: |
           export DB_NAME=squid
@@ -128,13 +128,13 @@ jobs:
         run: . ./scripts/ci/gh-actions-wait-for-port.sh $LIQ_POOLS_INDEXER_DB_PORT
 
       - name: "Wait for storage dictionary DB port"
-        if: ${{ inputs.liq-pools-indexer-is-with-dictionary }}
+        if: ${{ inputs.is-liq-pools-indexer-with-dictionary }}
         timeout-minutes: 2
         shell: bash
         run: . ./scripts/ci/gh-actions-wait-for-port.sh $STORAGE_DICT_DB_PORT
 
       - name: "Run storage dictionary processor"
-        if: ${{ inputs.liq-pools-indexer-is-with-dictionary }}
+        if: ${{ inputs.is-liq-pools-indexer-with-dictionary }}
         shell: bash
         working-directory: ./indexers/storage-dictionary
         env:
@@ -167,7 +167,7 @@ jobs:
           node --require=dotenv/config lib/main.js &
 
       - name: "Run storage-dictionary indexer api"
-        if: ${{ inputs.liq-pools-indexer-is-with-dictionary }}
+        if: ${{ inputs.is-liq-pools-indexer-with-dictionary }}
         shell: bash
         env:
           NODE_ENV: test
@@ -183,13 +183,13 @@ jobs:
 
       # Check of storage-dictionary indexer API status
       - name: "Wait for storage-dictionary indexer API port"
-        if: ${{ inputs.liq-pools-indexer-is-with-dictionary }}
+        if: ${{ inputs.is-liq-pools-indexer-with-dictionary }}
         timeout-minutes: 1
         shell: bash
         run: . ./scripts/ci/gh-actions-wait-for-port.sh $STORAGE_DICT_API_PORT
 
       - name: "Wait for storage-dictionary indexer reached the end of testing range"
-        if: ${{ inputs.liq-pools-indexer-is-with-dictionary }}
+        if: ${{ inputs.is-liq-pools-indexer-with-dictionary }}
         id: storage-dictionary-ind-status
         uses: actions/github-script@v7
         env:
@@ -214,6 +214,7 @@ jobs:
           DB_NAME: squid
           DB_PORT: ${{ env.LIQ_POOLS_INDEXER_DB_PORT }}
           GQL_PORT: ${{ env.LIQ_POOLS_INDEXER_API_PORT }}
+          USE_STORAGE_DICTIONARY: ${{ inputs.is-liq-pools-indexer-with-dictionary }}
           INDEX_FROM_BLOCK: ${{ env.LIQ_POOLS_INDEXER_FROM_BLOCK }}
           INDEX_TO_BLOCK: ${{ env.LIQ_POOLS_INDEXER_TO_BLOCK }}
           PROCESS_LBP_POOLS: ${{ inputs.process-lbp-pools }}
