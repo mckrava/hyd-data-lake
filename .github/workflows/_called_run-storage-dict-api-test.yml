@@ -92,11 +92,12 @@ jobs:
         env:
           NODE_ENV: test
           CHAIN: ${{ inputs.working-chain }}
-          DB_NAME: squid
+          DB_NAME: ${{ env.STORAGE_DICT_DB_NAME }}
           DB_PORT:  ${{ env.STORAGE_DICT_DB_PORT }}
           GQL_PORT: ${{ env.STORAGE_DICT_API_PORT }}
           START_BLOCK: ${{ env.FROM_BLOCK }}
           END_BLOCK: ${{ env.TO_BLOCK }}
+          ASSETS_TRACKER_PROCESSOR: true
           PROCESS_LBP_POOLS: ${{ inputs.process-lbp-pools }}
           PROCESS_XYK_POOLS: ${{ inputs.process-xyk-pools }}
           PROCESS_OMNIPOOLS: ${{ inputs.process-omnipools }}
