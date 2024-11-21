@@ -29,16 +29,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        workflow:
-          - _called_run-liq-pools-indexer-api-no-dict-test.yml
-          - _called_run-liq-pools-indexer-api-with-dict-test.yml
-          - _called_run-storage-dict-api-test.yml
+        workflow: [_called_run-liq-pools-indexer-api-no-dict-test.yml, _called_run-liq-pools-indexer-api-with-dict-test.yml, _called_run-storage-dict-api-test.yml]
     steps:
       - name: Call ${{ matrix.workflow }}
         uses: ./.github/workflows/${{ matrix.workflow }}
         with:
-          liquidity-pools-build-artifact-name: liquidity-pools-build-files
-          dictionary-build-artifact-name: dictionary-build-files
+          liquidity-pools-build-artifact-name: "liquidity-pools-build-files"
+          dictionary-build-artifact-name: "dictionary-build-files"
 
 #  trigger-called-workflows:
 #    runs-on: ubuntu-latest
