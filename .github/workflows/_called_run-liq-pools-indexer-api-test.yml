@@ -46,12 +46,14 @@ on:
         type: string
 
 env:
+  LIQ_POOLS_INDEXER_DB_NAME: squid
   LIQ_POOLS_INDEXER_DB_PORT: 23798
   LIQ_POOLS_INDEXER_API_PORT: 8080
 
   LIQ_POOLS_INDEXER_FROM_BLOCK: ${{ inputs.liq-pools-indexer-from-block }}
   LIQ_POOLS_INDEXER_TO_BLOCK: ${{ inputs.liq-pools-indexer-to-block }}
 
+  STORAGE_DICT_DB_NAME: store_dictionary
   STORAGE_DICT_DB_PORT: 23799
   STORAGE_DICT_API_PORT: 8090
 
@@ -98,7 +100,7 @@ jobs:
       - name: "Run DB for liquidity-pools indexer"
         shell: bash
         env:
-          DB_NAME: squid
+          DB_NAME: ${{ env.LIQ_POOLS_INDEXER_DB_NAME }}
           DB_PORT: ${{ env.LIQ_POOLS_INDEXER_DB_PORT }}
         run: |
           docker run -d \
@@ -113,7 +115,7 @@ jobs:
         if: ${{ inputs.is-liq-pools-indexer-with-dictionary }}
         shell: bash
         env:
-          DB_NAME: store_dictionary
+          DB_NAME: ${{ env.STORAGE_DICT_DB_NAME }}
           DB_PORT: ${{ env.STORAGE_DICT_DB_PORT }}
         run: |
           docker run -d \
@@ -142,7 +144,7 @@ jobs:
         env:
           NODE_ENV: test
           CHAIN: ${{ inputs.working-chain }}
-          DB_NAME: squid
+          DB_NAME: ${{ env.STORAGE_DICT_DB_NAME }}
           DB_PORT:  ${{ env.STORAGE_DICT_DB_PORT }}
           GQL_PORT: ${{ env.STORAGE_DICT_API_PORT }}
           START_BLOCK: ${{ env.STORAGE_DICT_INDEXER_FROM_BLOCK }}
@@ -197,7 +199,7 @@ jobs:
         env:
           NODE_ENV: test
           CHAIN: ${{ inputs.working-chain }}
-          DB_NAME: squid
+          DB_NAME: ${{ env.LIQ_POOLS_INDEXER_DB_NAME }}
           DB_PORT: ${{ env.LIQ_POOLS_INDEXER_DB_PORT }}
           GQL_PORT: ${{ env.LIQ_POOLS_INDEXER_API_PORT }}
           USE_STORAGE_DICTIONARY: ${{ inputs.is-liq-pools-indexer-with-dictionary }}
@@ -208,7 +210,7 @@ jobs:
           PROCESS_OMNIPOOLS: ${{ inputs.process-omnipools }}
           PROCESS_STABLEPOOLS: ${{ inputs.process-stablepools }}
         run: |
-          sleep 10s
+          sleep 5s
           npx squid-typeorm-migration apply
           node --require=dotenv/config lib/main.js &
 
