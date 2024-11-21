@@ -163,10 +163,6 @@ jobs:
           GQL_PORT: ${{ env.STORAGE_DICT_API_PORT }}
         working-directory: ./indexers/storage-dictionary
         run: |
-#          cd indexers/storage-dictionary
-#          export CHAIN=hydration
-#          export NODE_ENV=test
-#          export GQL_PORT=$STORAGE_DICT_API_PORT
           node --require=dotenv/config lib/api.js &
 
       # Check of storage-dictionary indexer API status
@@ -210,15 +206,7 @@ jobs:
           PROCESS_OMNIPOOLS: ${{ inputs.process-omnipools }}
           PROCESS_STABLEPOOLS: ${{ inputs.process-stablepools }}
         run: |
-#          cd indexers/liquidity-pools
           sleep 10s
-#          export NODE_ENV=test
-#          export DB_NAME=squid
-#          export DB_PORT=$LIQ_POOLS_INDEXER_DB_PORT
-#          export GQL_PORT=$LIQ_POOLS_INDEXER_API_PORT
-#          export CHAIN=hydration
-#          export INDEX_FROM_BLOCK=$LIQ_POOLS_INDEXER_FROM_BLOCK
-#          export INDEX_TO_BLOCK=$LIQ_POOLS_INDEXER_TO_BLOCK
           npx squid-typeorm-migration apply
           node --require=dotenv/config lib/main.js &
 
@@ -230,9 +218,6 @@ jobs:
           GQL_PORT: ${{ env.LIQ_POOLS_INDEXER_API_PORT }}
         working-directory: ./indexers/liquidity-pools
         run: |
-#          cd indexers/liquidity-pools
-#          export CHAIN=hydration
-#          export NODE_ENV=test
           node --require=dotenv/config lib/api.js &
 
       # Check of liquidity-pools indexer API status
