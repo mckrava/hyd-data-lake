@@ -2,7 +2,7 @@
 # More information about Reusing workflows - https://docs.github.com/en/actions/using-workflows/reusing-workflows
 
 # Run API tests for Indexers.
-name: "Reusable :: API tests"
+name: "Reusable :: API test :: Liq.pools indexer with dictionary"
 
 on:
   workflow_call:
