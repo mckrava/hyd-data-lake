@@ -105,7 +105,7 @@ jobs:
         run: |
           docker run -d \
           --name liquidity_pools \
-          -e POSTGRES_DB=squid \
+          -e POSTGRES_DB=$DB_NAME \
           -e POSTGRES_PASSWORD=postgres \
           --shm-size=1gb \
           -p ${DB_PORT}:5432 \
@@ -120,7 +120,7 @@ jobs:
         run: |
           docker run -d \
           --name store_dictionary \
-          -e POSTGRES_DB=store_dictionary \
+          -e POSTGRES_DB=$DB_NAME \
           -e POSTGRES_PASSWORD=postgres \
           --shm-size=1gb \
           -p ${DB_PORT}:5432 \
@@ -251,6 +251,6 @@ jobs:
           CI_LIQUIDITY_POOLS_API_URL: "http://127.0.0.1:${{ env.LIQ_POOLS_INDEXER_API_PORT }}/graphql"
           CI_INDEX_FROM_BLOCK: ${{ env.LIQ_POOLS_INDEXER_FROM_BLOCK }}
           CI_INDEX_TO_BLOCK: ${{ env.LIQ_POOLS_INDEXER_TO_BLOCK }}
+        working-directory: ./indexers/liquidity-pools
         run: |
-          cd indexers/liquidity-pools
           npm run test:api
