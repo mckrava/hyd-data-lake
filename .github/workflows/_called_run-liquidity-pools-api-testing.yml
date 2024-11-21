@@ -14,6 +14,15 @@ on:
         required: true
         type: string
 
+env:
+  LIQ_POOLS_INDEXER_DB_PORT: 23798
+  LIQ_POOLS_INDEXER_API_PORT: 8080
+  LIQ_POOLS_INDEXER_FROM_BLOCK: 3681427
+  LIQ_POOLS_INDEXER_TO_BLOCK: 3706164
+
+  STORAGE_DICT_INDEXER_FROM_BLOCK: 3681427
+  STORAGE_DICT_INDEXER_TO_BLOCK: 3706164
+
 jobs:
   # Run API tests
   run:
@@ -25,16 +34,7 @@ jobs:
         with:
           node-version: 20
 
-#      - uses: KengoTODA/actions-setup-docker-compose@v1
-#        with:
-#          version: "2.14.2"
-
       - uses: actions/checkout@v4
-
-#      - name: "Install docker compose"
-#        run: |
-#          sudo apt-get update
-#          sudo apt-get install docker-compose-plugin
 
       # Download artifacts with Liquidity pools indexer build
       - name: "Download Liquidity pools indexer build"
@@ -59,58 +59,36 @@ jobs:
       - name: "Change folders permissions"
         run: chmod -R 777 ./scripts/ci
 
-#      - name: "Run DB for liquidity-pools indexer"
-#        shell: bash
-#        run: |
-#          export DB_NAME=squid
-#          export DB_PORT=23798
-#          docker compose -f ./indexers/liquidity-pools/docker-compose.yml -p liquidity_pools up -d
-
       - name: "Run DB for liquidity-pools indexer"
         shell: bash
         run: |
           export DB_NAME=squid
-          export DB_PORT=23798
+          export DB_PORT=$LIQ_POOLS_INDEXER_DB_PORT
           docker run -d \
           --name liquidity_pools \
           -e POSTGRES_DB=squid \
           -e POSTGRES_PASSWORD=postgres \
           --shm-size=1gb \
-          -p 23798:5432 \
+          -p ${DB_PORT}:5432 \
           postgres:15
-
-#      - name: "Run DB for storage-dictionary indexer"
-#        shell: bash
-#        run: |
-#          export DB_NAME=store_dictionary
-#          export DB_PORT=23799
-#          docker compose -f ./indexers/storage-dictionary/docker-compose.yml -p storage_dictionary up -d
 
       - name: "Wait for liquidity-pools DB port :23798"
         timeout-minutes: 2
         shell: bash
-        run: . ./scripts/ci/gh-actions-wait-for-port.sh 23798
-
-#      - name: "Wait for storage dictionary DB port :23799"
-#        timeout-minutes: 2
-#        shell: bash
-#        run: . ./scripts/ci/gh-actions-wait-for-port.sh 23799
+        run: . ./scripts/ci/gh-actions-wait-for-port.sh $LIQ_POOLS_INDEXER_DB_PORT
 
       - name: "Run liquidity-pools indexer processor"
         shell: bash
         run: |
           cd indexers/liquidity-pools
           sleep 10s
-          docker ps
           export NODE_ENV=test
           export DB_NAME=squid
-          export DB_PORT=23798
-          export DB_HOST=127.0.0.1
-          export DB_PASS=postgres
-          export DB_USER=postgres
+          export DB_PORT=$LIQ_POOLS_INDEXER_DB_PORT
+          export GQL_PORT=$LIQ_POOLS_INDEXER_API_PORT
           export CHAIN=hydration
-          export INDEX_FROM_BLOCK=3681427
-          export INDEX_TO_BLOCK=3706164
+          export INDEX_FROM_BLOCK=$LIQ_POOLS_INDEXER_FROM_BLOCK
+          export INDEX_TO_BLOCK=$LIQ_POOLS_INDEXER_TO_BLOCK
           npx squid-typeorm-migration apply
           node --require=dotenv/config lib/main.js &
 
@@ -122,65 +100,33 @@ jobs:
           export NODE_ENV=test
           node --require=dotenv/config lib/api.js &
 
-#      - name: "Run storage-dictionary indexer"
-#        shell: bash
-#        run: |
-#          cd indexers/storage-dictionary
-#          export DB_NAME=store_dictionary
-#          export DB_PORT=23799
-#          npx squid-typeorm-migration apply
-#          node --require=dotenv/config lib/main.js &
-#
-#      - name: "Run storage-dictionary indexer api"
-#        shell: bash
-#        run: |
-#          cd indexers/storage-dictionary
-#          node --require=dotenv/config lib/api.js &
-
       # Check of liquidity-pools indexer API status
-      - name: "Wait for liquidity-pools indexer API port :8080"
+      - name: "Wait for liquidity-pools indexer API port"
         timeout-minutes: 1
         shell: bash
-        run: . ./scripts/ci/gh-actions-wait-for-port.sh 8080
-
-      # Check of storage-dictionary indexer API status
-#      - name: "Wait for storage-dictionary indexer API port :8090"
-#        timeout-minutes: 1
-#        shell: bash
-#        run: . ./scripts/ci/gh-actions-wait-for-port.sh 8090
+        run: . ./scripts/ci/gh-actions-wait-for-port.sh $LIQ_POOLS_INDEXER_API_PORT
 
       - name: "Run github-script to wait for liquidity-pools indexer reached the end of testing range"
         id: liquidity-pools-ind-status
         uses: actions/github-script@v7
         env:
           # Env variables
-          INDEX_FROM_BLOCK: 3681427
-          INDEX_TO_BLOCK: 3706164
-          PROCESSOR_API_URL: "http://127.0.0.1:8080/graphql"
+          INDEX_FROM_BLOCK: ${{ env.LIQ_POOLS_INDEXER_FROM_BLOCK }}
+          INDEX_TO_BLOCK: ${{ env.LIQ_POOLS_INDEXER_TO_BLOCK }}
+          PROCESSOR_API_URL: "http://127.0.0.1:${{ env.LIQ_POOLS_INDEXER_API_PORT }}/graphql"
         with:
-          # "github-token" parameter is required for work with GitHub API
-          #          github-token: ${{ secrets.GITHUB_TOKEN }}
           result-encoding: string
           script: |
             const script = require('./scripts/ci/github-script-src/wait-for-processor-status.js')
             return await script({github, context, core})
 
-      # Cancel workflow`.
-      - name: "Cancel workflow"
-#        if: steps.liquidity-pools-ind-status.outputs.result.finished != true
-        if: fromJson(steps.liquidity-pools-ind-status.outputs.result).finished != true
-        uses: styfle/cancel-workflow-action@0.9.1
-        with:
-          access_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 'Run API tests for liquidity-pools'
+      - name: "Run API tests for liquidity-pools"
         shell: bash
         env:
           CI_NODE_ENV: test
-          CI_LIQUIDITY_POOLS_API_URL: "http://127.0.0.1:8080/graphql"
-          CI_INDEX_FROM_BLOCK: 3681427
-          CI_INDEX_TO_BLOCK: 3706164
+          CI_LIQUIDITY_POOLS_API_URL: "http://127.0.0.1:${{ env.LIQ_POOLS_INDEXER_API_PORT }}/graphql"
+          CI_INDEX_FROM_BLOCK: ${{ env.LIQ_POOLS_INDEXER_FROM_BLOCK }}
+          CI_INDEX_TO_BLOCK: ${{ env.LIQ_POOLS_INDEXER_TO_BLOCK }}
         run: |
           cd indexers/liquidity-pools
           npm run test:api
-        
