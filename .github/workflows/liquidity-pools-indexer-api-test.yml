@@ -29,7 +29,7 @@ jobs:
     name: "Liq.pools indexer with no dictionary API test"
     needs: build
     if: ${{ needs.build.result=='success' }}
-    uses: ./.github/workflows/_called_run-liq-pools-indexer-api-dict-test.yml
+    uses: ./.github/workflows/_called_run-liq-pools-indexer-api-test.yml
     with:
       liquidity-pools-build-artifact-name: liquidity-pools-build-files
       dictionary-build-artifact-name: dictionary-build-files
