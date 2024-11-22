@@ -213,7 +213,7 @@ jobs:
         run: |
           sleep 5s
           npx squid-typeorm-migration apply
-          node --require=dotenv/config lib/main.js &
+          node --require=dotenv/config lib/main.js
 
       - name: "Run liquidity-pools indexer api"
         shell: bash
