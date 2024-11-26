@@ -1,6 +1,6 @@
 {
   "name": "liquidity-pools",
-  "description": "An indexer for the Hydration mainnet and Pareo chains, designed to collect and organize data on liquidity pools.",
+  "description": "An indexer for the Hydration mainnet and Paseo chains, designed to collect and organize data on liquidity pools.",
   "private": true,
   "engines": {
     "node": ">=16"
@@ -9,13 +9,11 @@
     "process": "node --require=dotenv/config lib/main.js",
     "build": "rm -rf lib && tsc",
     "node-pg-migrate": "node-pg-migrate",
-    "postbuild": "cpx 'src/**/*.sql' lib",
+    "postbuild": "cpx 'src/**/*.sql' lib && cpx 'src/**/*.graphql' lib",
     "deploy-main": "sqd deploy --org galacticcouncil . -m deployment-xyk-pools-indexer.yaml",
     "ingester-codegen:all": ". ./scripts/ingester-codegen.sh",
     "multi-typegen": ". ./scripts/typegen.sh",
-    "api-codegen:dictionary-api": "graphql-codegen --require dotenv/config --config dictionaryGqlTypesConfig/codegen-dictionary-common.ts",
-    "api-codegen:api-tests": "graphql-codegen --require dotenv/config --config dictionaryGqlTypesConfig/codegen-api-tests.ts",
-    "test:api": "NODE_ENV=test jest --config tests/api/jest-api.js --verbose --runInBand"
+    "api-codegen:dictionary-api": "graphql-codegen --require dotenv/config --config dictionaryGqlTypesConfig/codegen-dictionary-common.ts"
   },
   "dependencies": {
     "@galacticcouncil/sdk": "^4.2.1",

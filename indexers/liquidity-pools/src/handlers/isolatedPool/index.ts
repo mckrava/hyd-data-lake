@@ -42,7 +42,6 @@ export async function handleLbpPools(
     await lpbPoolUpdated(ctx, eventData);
   }
 
-
   await ctx.store.save(
     [...ctx.batchState.state.lbpAllBatchPools.values()].filter((pool) =>
       ctx.batchState.state.lbpPoolIdsToSave.has(pool.id)

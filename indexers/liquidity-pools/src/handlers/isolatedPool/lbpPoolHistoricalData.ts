@@ -99,12 +99,9 @@ export async function handleLbpPoolHistoricalData(
       })
   );
 
-
   const predefinedEntitiesWithoutDuplicates = new Map(
     predefinedEntities.filter((item) => !!item).map((item) => [item.id, item])
   );
-  console.log('predefinedEntitiesWithoutDuplicates - ', predefinedEntitiesWithoutDuplicates.size);
-
 
   await ctx.store.save([...predefinedEntitiesWithoutDuplicates.values()]);
 }
