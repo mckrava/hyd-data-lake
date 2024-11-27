@@ -38,19 +38,19 @@ jobs:
         shell: bash
         run: |
           sudo chmod +x ./scripts/ci/gh-actions-get-branch-name.sh
-          echo "##[set-output name=name;]$(./scripts/ci/gh-actions-get-branch-name.sh "$GITHUB_EVENT_NAME" "$GITHUB_REF" "$GITHUB_BASE_REF")"
+          BRANCH_NAME=$(./scripts/ci/gh-actions-get-branch-name.sh "$GITHUB_EVENT_NAME" "$GITHUB_REF" "$GITHUB_BASE_REF")
+          echo "name=${BRANCH_NAME}" >> $GITHUB_OUTPUT
 
       - name: Set IMAGE_TAG based on branch
         id: image-tag
         env:
           BRANCH_NAME: ${{ steps.branch-name-as-tag.outputs.name }}
         run: |
-          if [[ "${{ github.ref_name }}" == "main" ]]; then
-            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+          if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
+            echo "tag=latest" >> $GITHUB_OUTPUT
           else
-            echo "IMAGE_TAG=${BRANCH_NAME}:WIP" >> $GITHUB_ENV
+            echo "tag=${BRANCH_NAME}:WIP" >> $GITHUB_OUTPUT
           fi
-          echo "tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
         
 
   build-and-push-liquidity-pools-indexer-image:
@@ -145,83 +145,3 @@ jobs:
           push: true
           tags: ${{ steps.storage-dictionary-ind-meta.outputs.tags }}
           labels: ${{ steps.storage-dictionary-ind-meta.outputs.labels }}
-            
-
-#      - name: Build and publish image for main branch or tag push event
-#        env:
-#          DOCKER_REPO_TAGGED: ${{ env.DOCKER_REPO_TAGGED }}
-#        working-directory: indexers/liquidity-pools/
-#        run: |
-#          docker buildx build \
-#          --platform linux/amd64,linux/arm64 \
-#          --label "org.opencontainers.image.source=https://github.com/${{ github.repository_owner }}/liquidity-pools-indexer" \
-#          --label "org.opencontainers.image.description=Hydration Liquidity Pools indexer image" \
-#          --label "org.opencontainers.image.licenses=MIT" \
-#          --push \
-#          -t ${DOCKER_REPO_TAGGED} \
-#          -f Dockerfile \
-#          .
-#
-#      - name: Pull image from GitHub Container Registry
-#        run: docker pull ghcr.io/${{ github.repository_owner }}/liquidity-pools-indexer:${{env.IMAGE_TAG}}
-#
-#      - name: Tag image with name and version tag
-#        run: docker tag ghcr.io/${{ github.repository_owner }}/liquidity-pools-indexer:${{env.IMAGE_TAG}} liquidity-pools-indexer:${{env.IMAGE_TAG}}
-#
-#      - name: Push image to Docker Hub
-#        run: docker push liquidity-pools-indexer:${{env.IMAGE_TAG}}
-
-
-
-          
-#      - name: set docker metadata
-#        id: meta
-#        uses: docker/metadata-action@v5
-#        with:
-#          images: |
-#            ${{ github.repository_owner }}/liquidity-pools-indexer
-#          tags: |
-#            latest
-##            type=schedule,pattern=nightly
-##            type=schedule,prefix=nightly-,pattern={{date 'YYYYMMDD'}}
-##            type=ref,event=branch
-##            type=ref,event=pr
-##            type=ref,event=tag
-##            type=semver,pattern={{version}}
-##            type=semver,pattern={{major}}.{{minor}}
-##            type=semver,pattern={{major}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.') }}
-##            type=sha,format=long,prefix=,suffix=
-#          labels: |
-#            org.opencontainers.image.source=https://github.com/${{ github.repository_owner }}/hyd-data-lake
-#            org.opencontainers.image.description=Hydration Liquidity Pools indexer image
-#            org.opencontainers.image.licenses=MIT
-#
-#      - name: build and push
-#        uses: docker/build-push-action@v6
-#        with:
-#          context: .
-#          target: final
-#          push: false
-#          load: true
-#          file: indexers/liquidity-pools/Dockerfile
-#          tags: ${{ steps.meta.outputs.tags }}
-#          labels: ${{ steps.meta.outputs.labels }}
-#          no-cache: true
-#          pull: true
-
-#      - name: "Run liquidity-pools indexer api"
-#        shell: bash
-#        working-directory: ./indexers/liquidity-pools
-#        run: |
-#          docker build \
-#          . \
-#          -t liquidity-pools-indexer:latest
-#          --label "org.opencontainers.image.source=https://github.com/mckrava/hyd-data-lake" \
-#          --label "org.opencontainers.image.description=Hydration Liquidity Pools indexer image" \
-#          --label "org.opencontainers.image.licenses=MIT" \
-          
-          
-          
-      
-
-
