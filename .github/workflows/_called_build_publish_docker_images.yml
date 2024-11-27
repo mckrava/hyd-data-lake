@@ -23,6 +23,9 @@ jobs:
   build:
     name: "Build"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
 
@@ -70,30 +73,56 @@ jobs:
             echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_ENV
           fi
 
-      - name: Build and publish image for main branch or tag push event
-        env:
-          DOCKER_REPO_TAGGED: ${{ env.DOCKER_REPO_TAGGED }}
-        working-directory: indexers/liquidity-pools/
-        run: |
-          docker buildx build \
-          --platform linux/amd64,linux/arm64 \
-          --label "org.opencontainers.image.source=https://github.com/${{ github.repository_owner }}/liquidity-pools-indexer" \
-          --label "org.opencontainers.image.description=Hydration Liquidity Pools indexer image" \
-          --label "org.opencontainers.image.licenses=MIT" \
-          --push \
-          -t ${DOCKER_REPO_TAGGED} \
-          -f Dockerfile \
-          .
+      - name: set docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/liquidity-pools-indexer
+          tags: |
+            ${{env.DOCKER_REPO_TAGGED}}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository_owner }}/hyd-data-lake
+            org.opencontainers.image.description=Hydration Liquidity Pools indexer image
+            org.opencontainers.image.licenses=MIT
+            
+      - name: Build and push Docker image
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          file: indexers/liquidity-pools/Dockerfile
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+            
 
-      - name: Pull image from GitHub Container Registry
-        run: docker pull ghcr.io/${{ github.repository_owner }}/liquidity-pools-indexer:${{env.IMAGE_TAG}}
+#      - name: Build and publish image for main branch or tag push event
+#        env:
+#          DOCKER_REPO_TAGGED: ${{ env.DOCKER_REPO_TAGGED }}
+#        working-directory: indexers/liquidity-pools/
+#        run: |
+#          docker buildx build \
+#          --platform linux/amd64,linux/arm64 \
+#          --label "org.opencontainers.image.source=https://github.com/${{ github.repository_owner }}/liquidity-pools-indexer" \
+#          --label "org.opencontainers.image.description=Hydration Liquidity Pools indexer image" \
+#          --label "org.opencontainers.image.licenses=MIT" \
+#          --push \
+#          -t ${DOCKER_REPO_TAGGED} \
+#          -f Dockerfile \
+#          .
+#
+#      - name: Pull image from GitHub Container Registry
+#        run: docker pull ghcr.io/${{ github.repository_owner }}/liquidity-pools-indexer:${{env.IMAGE_TAG}}
+#
+#      - name: Tag image with name and version tag
+#        run: docker tag ghcr.io/${{ github.repository_owner }}/liquidity-pools-indexer:${{env.IMAGE_TAG}} liquidity-pools-indexer:${{env.IMAGE_TAG}}
+#
+#      - name: Push image to Docker Hub
+#        run: docker push liquidity-pools-indexer:${{env.IMAGE_TAG}}
 
-      - name: Tag image with name and version tag
-        run: docker tag ghcr.io/${{ github.repository_owner }}/liquidity-pools-indexer:${{env.IMAGE_TAG}} liquidity-pools-indexer:${{env.IMAGE_TAG}}
 
-      - name: Push image to Docker Hub
-        run: docker push liquidity-pools-indexer:${{env.IMAGE_TAG}}
-          
+
           
 #      - name: set docker metadata
 #        id: meta
