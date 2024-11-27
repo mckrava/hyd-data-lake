@@ -16,7 +16,7 @@ on:
         required: true
         type: string
     secrets:
-      gh_token:
+      GHCR_AUTH_TOKEN:
         required: true
 
 env:
@@ -43,7 +43,7 @@ jobs:
           driver-opts: network=host
 
       - name: Debug secret access
-        run:
+        run: |
           echo "Secret length: ${#secrets.GHCR_AUTH_TOKEN}"
           echo "ENV length: ${#env.GHCR_ACCESS_TOKEN}"
 
@@ -52,7 +52,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{env.GHCR_ACCESS_TOKEN}}
+          password: ${{ secrets.GHCR_AUTH_TOKEN }}
 
       - name: Set DOCKER_REPO_TAGGED based on branch or tag
         run: |
