@@ -23,9 +23,9 @@ jobs:
   build:
     name: "Build"
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+#    permissions:
+#      contents: read
+#      packages: write
     steps:
       - uses: actions/checkout@v4
 
@@ -80,7 +80,7 @@ jobs:
           images: |
             ghcr.io/${{ github.repository_owner }}/liquidity-pools-indexer
           tags: |
-            custom-ver
+            ${{env.IMAGE_TAG}}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository_owner }}/hyd-data-lake
             org.opencontainers.image.description=Hydration Liquidity Pools indexer image
