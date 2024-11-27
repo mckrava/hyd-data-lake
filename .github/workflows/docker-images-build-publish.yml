@@ -16,11 +16,7 @@ on:
 jobs:
   docker-images-build-publish:
     name: "Build and publish docker images of indexers"
-#    needs: build
     uses: ./.github/workflows/_called_build_publish_docker_images.yml
-    with:
-      liquidity-pools-build-artifact-name: liquidity-pools-build-files
-      dictionary-build-artifact-name: dictionary-build-files
     secrets:
       GHCR_AUTH_TOKEN: ${{ secrets.GHCR_AUTH_TOKEN }}
 
