@@ -1,6 +1,6 @@
 # Run tests for Liquidity Pools API
 
-name: "Liquidity Pools and Storage Dictionary API testing"
+name: "Docker images build and publish"
 
 on:
   push:
