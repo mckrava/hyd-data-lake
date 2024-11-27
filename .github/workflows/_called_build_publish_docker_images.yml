@@ -80,7 +80,6 @@ jobs:
           images: |
             ghcr.io/liquidity-pools-indexer
           tags: |
-            ${{env.IMAGE_TAG}}
             custom-ver
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository_owner }}/hyd-data-lake
