@@ -51,8 +51,8 @@ jobs:
         id: branch-name-as-tag
         shell: bash
         run: |
-          sudo chmod +x ./scripts/ci/gh-actions-branch-name-serialize.sh
-          echo "##[set-output name=name;]$(./scripts/ci/gh-actions-branch-name-serialize.sh "$GITHUB_EVENT_NAME" "$GITHUB_REF" "$GITHUB_BASE_REF")"
+          sudo chmod +x ./scripts/ci/gh-actions-get-branch-name-as-image-tag.sh
+          echo "##[set-output name=name;]$(./scripts/ci/gh-actions-get-branch-name-as-image-tag.sh "$GITHUB_EVENT_NAME" "$GITHUB_REF" "$GITHUB_BASE_REF")"
 
       - name: Set DOCKER_REPO_TAGGED based on branch or tag
         env:
