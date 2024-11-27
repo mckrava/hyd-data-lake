@@ -69,7 +69,7 @@ jobs:
           if [[ "${{ github.ref_name }}" == "main" ]]; then
             echo "IMAGE_TAG=latest" >> $GITHUB_ENV
           else
-            echo "IMAGE_TAG=${BRANCH_NAME}__wip" >> $GITHUB_ENV
+            echo "IMAGE_TAG=${BRANCH_NAME}:WIP" >> $GITHUB_ENV
           fi
 
       - name: set docker metadata
