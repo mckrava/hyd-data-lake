@@ -14,7 +14,6 @@ on:
       - "main"
 
 jobs:
-
   docker-images-build-publish:
     name: "Build and publish docker images of indexers"
 #    needs: build

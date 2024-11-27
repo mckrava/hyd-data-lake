@@ -26,10 +26,10 @@ env:
 
 jobs:
   extract-image-tag-from-branch-name:
-    name: "Build and push Liquidity Pools indexer image"
+    name: "Extract tag from branch name"
     runs-on: ubuntu-latest
     outputs:
-      tag: ${{ steps.branch-name-as-tag.outputs.tag }}
+      tag: ${{ steps.image-tag.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
 
@@ -41,6 +41,7 @@ jobs:
           echo "##[set-output name=name;]$(./scripts/ci/gh-actions-get-branch-name.sh "$GITHUB_EVENT_NAME" "$GITHUB_REF" "$GITHUB_BASE_REF")"
 
       - name: Set IMAGE_TAG based on branch
+        id: image-tag
         env:
           BRANCH_NAME: ${{ steps.branch-name-as-tag.outputs.name }}
         run: |
@@ -74,23 +75,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_AUTH_TOKEN }}
 
-#      - name: "Sanitize branch name"
-#        id: branch-name-as-tag
-#        shell: bash
-#        run: |
-#          sudo chmod +x ./scripts/ci/gh-actions-get-branch-name.sh
-#          echo "##[set-output name=name;]$(./scripts/ci/gh-actions-get-branch-name.sh "$GITHUB_EVENT_NAME" "$GITHUB_REF" "$GITHUB_BASE_REF")"
-#
-#      - name: Set IMAGE_TAG based on branch
-#        env:
-#          BRANCH_NAME: ${{ steps.branch-name-as-tag.outputs.name }}
-#        run: |
-#          if [[ "${{ github.ref_name }}" == "main" ]]; then
-#            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
-#          else
-#            echo "IMAGE_TAG=${BRANCH_NAME}:WIP" >> $GITHUB_ENV
-#          fi
-
       - name: Set Docker metadata for Liquidity Pools indexer
         id: liquidity-pools-ind-meta
         uses: docker/metadata-action@v5
@@ -101,7 +85,7 @@ jobs:
             ${{ needs.extract-image-tag-from-branch-name.outputs.tag }}
             ${{ github.sha }}
           labels: |
-            org.opencontainers.image.source=https://github.com/${{github.repository_owner}}/hyd-data-lake
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.description=Hydration Liquidity Pools indexer image
             org.opencontainers.image.licenses=MIT
             org.opencontainers.image.title=liquidity-pools-indexer
@@ -138,24 +122,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_AUTH_TOKEN }}
 
-#      - name: "Sanitize branch name"
-#        id: branch-name-as-tag
-#        shell: bash
-#        run: |
-#          sudo chmod +x ./scripts/ci/gh-actions-get-branch-name.sh
-#          echo "##[set-output name=name;]$(./scripts/ci/gh-actions-get-branch-name.sh "$GITHUB_EVENT_NAME" "$GITHUB_REF" "$GITHUB_BASE_REF")"
-#
-#      - name: Set IMAGE_TAG based on branch
-#        env:
-#          BRANCH_NAME: ${{ steps.branch-name-as-tag.outputs.name }}
-#        run: |
-#          if [[ "${{ github.ref_name }}" == "main" ]]; then
-#            echo "IMAGE_TAG=latest" >> $GITHUB_ENV
-#          else
-#            echo "IMAGE_TAG=${BRANCH_NAME}:WIP" >> $GITHUB_ENV
-#          fi
-      
-
       - name: Set Docker metadata for Storage Dictionary indexer
         id: storage-dictionary-ind-meta
         uses: docker/metadata-action@v5
@@ -166,7 +132,7 @@ jobs:
             ${{ needs.extract-image-tag-from-branch-name.outputs.tag }}
             ${{ github.sha }}
           labels: |
-            org.opencontainers.image.source=https://github.com/${{github.repository_owner}}/hyd-data-lake
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.description=Hydration Storage Dictionary indexer image
             org.opencontainers.image.licenses=MIT
             org.opencontainers.image.title=storage-dictionary-indexer
