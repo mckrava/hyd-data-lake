@@ -19,6 +19,11 @@ on:
       gh_token:
         required: true
 
+env:
+  ACTIONS_STEP_DEBUG: true
+  DOCKER_BUILDKIT: 1
+  BUILDKIT_PROGRESS: plain
+
 jobs:
   build:
     name: "Build"
@@ -52,19 +57,12 @@ jobs:
         with:
           driver-opts: network=host
 
-      - name: Debug
-        env:
-          ACTOR: ${{github.actor}}
-          TOKEN: ${{secrets.MK_PERSONAL_TOKEN}}
-        run: |
-          echo $TOKEN | docker login ghcr.io -u $ACTOR --password-stdin
-
-#      - name: Login to GitHub Container Registry
-#        uses: docker/login-action@v3
-#        with:
-#          registry: ghcr.io
-#          username: ${{ github.actor }}
-#          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.MK_PERSONAL_TOKEN }}
 
       - name: Set DOCKER_REPO_TAGGED based on branch or tag
         run: |
