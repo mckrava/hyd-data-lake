@@ -1,28 +1,10 @@
-# This workflow can be invoked only from caller workflow.
-# More information about Reusing workflows - https://docs.github.com/en/actions/using-workflows/reusing-workflows
-
-# Build indexers production ready files. Build results will be saved as artifacts with names, passed
-# in "liquidity-pools-build-artifact-name" and "dictionary-build-artifact-name" inputs.
-
 name: "Reusable :: Build and Publish Docker images"
 
 on:
   workflow_call:
-    inputs:
-      liquidity-pools-build-artifact-name:
-        required: true
-        type: string
-      dictionary-build-artifact-name:
-        required: true
-        type: string
     secrets:
       GHCR_AUTH_TOKEN:
         required: true
-
-env:
-  ACTIONS_STEP_DEBUG: true
-  DOCKER_BUILDKIT: 1
-  BUILDKIT_PROGRESS: plain
 
 jobs:
   extract-image-tag-from-branch-name:
@@ -49,9 +31,8 @@ jobs:
           if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
             echo "tag=latest" >> $GITHUB_OUTPUT
           else
-            echo "tag=${BRANCH_NAME}:WIP" >> $GITHUB_OUTPUT
+            echo "tag=wip-${BRANCH_NAME}" >> $GITHUB_OUTPUT
           fi
-        
 
   build-and-push-liquidity-pools-indexer-image:
     name: "Build and push Liquidity Pools indexer image"
@@ -94,11 +75,11 @@ jobs:
         id: liquidity-pools-indexer-push
         uses: docker/build-push-action@v6
         with:
+          platforms: linux/amd64,linux/arm64
           context: ./indexers/liquidity-pools/
           push: true
           tags: ${{ steps.liquidity-pools-ind-meta.outputs.tags }}
           labels: ${{ steps.liquidity-pools-ind-meta.outputs.labels }}
-
 
   build-and-push-storage-dictionary-indexer-image:
     name: "Build and push Storage dictionary indexer image"
@@ -141,6 +122,7 @@ jobs:
         id: storage-dictionary-indexer-push
         uses: docker/build-push-action@v6
         with:
+          platforms: linux/amd64,linux/arm64
           context: ./indexers/storage-dictionary/
           push: true
           tags: ${{ steps.storage-dictionary-ind-meta.outputs.tags }}
