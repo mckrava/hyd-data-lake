@@ -47,7 +47,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{secrets.GHCR_AUTH_TOKEN}}
+          password: ${{env.GHCR_ACCESS_TOKEN}}
 
       - name: Set DOCKER_REPO_TAGGED based on branch or tag
         run: |
