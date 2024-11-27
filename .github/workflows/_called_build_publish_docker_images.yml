@@ -86,7 +86,8 @@ jobs:
             org.opencontainers.image.source=https://github.com/${{ github.repository_owner }}/hyd-data-lake
             org.opencontainers.image.description=Hydration Liquidity Pools indexer image
             org.opencontainers.image.licenses=MIT
-            
+            org.opencontainers.image.title=liquidity-pools-indexer
+
       - name: Build and push Docker image
         id: push
         uses: docker/build-push-action@v6
