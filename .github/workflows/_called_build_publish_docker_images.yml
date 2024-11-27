@@ -90,9 +90,9 @@ jobs:
         id: push
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: indexers/liquidity-pools/
           push: true
-          file: indexers/liquidity-pools/Dockerfile
+          file: Dockerfile
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
             
