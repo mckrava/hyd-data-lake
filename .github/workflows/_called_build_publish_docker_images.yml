@@ -74,7 +74,7 @@ jobs:
             ${{env.IMAGE_TAG}}
             ${{ github.sha }}
           labels: |
-            org.opencontainers.image.source=https://github.com/${{github.repository}}
+            org.opencontainers.image.source=https://github.com/${{github.repository_owner}}/hyd-data-lake
             org.opencontainers.image.description=Hydration Liquidity Pools indexer image
             org.opencontainers.image.licenses=MIT
             org.opencontainers.image.title=liquidity-pools-indexer
@@ -99,7 +99,7 @@ jobs:
             ${{env.IMAGE_TAG}}
             ${{ github.sha }}
           labels: |
-            org.opencontainers.image.source=https://github.com/${{github.repository}}
+            org.opencontainers.image.source=https://github.com/${{github.repository_owner}}/hyd-data-lake
             org.opencontainers.image.description=Hydration Storage Dictionary indexer image
             org.opencontainers.image.licenses=MIT
             org.opencontainers.image.title=storage-dictionary-indexer
