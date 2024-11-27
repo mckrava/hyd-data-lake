@@ -42,11 +42,6 @@ jobs:
         with:
           driver-opts: network=host
 
-      - name: Debug secret access
-        run: |
-          echo "Secret length: ${#secrets.GHCR_AUTH_TOKEN}"
-          echo "ENV length: ${#env.GHCR_ACCESS_TOKEN}"
-
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
