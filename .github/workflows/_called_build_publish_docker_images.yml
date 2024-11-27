@@ -34,21 +34,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Download artifacts with Liquidity pools indexer build
-      - name: "Download Liquidity pools indexer build"
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ inputs.liquidity-pools-build-artifact-name }}
-          path: ./indexers/liquidity-pools/lib
-
-      # Download artifacts with Liquidity pools indexer build
-      - name: "Download Storage Dictionary indexer build"
-        if: ${{ inputs.is-liq-pools-indexer-with-dictionary }}
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ inputs.dictionary-build-artifact-name }}
-          path: ./indexers/storage-dictionary/lib
-
       - name: set up docker qemu
         uses: docker/setup-qemu-action@v3
 
@@ -62,7 +47,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: "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"
+          password: ${{secrets.GHCR_AUTH_TOKEN}}
 
       - name: Set DOCKER_REPO_TAGGED based on branch or tag
         run: |
