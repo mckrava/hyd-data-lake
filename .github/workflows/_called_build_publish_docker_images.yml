@@ -80,7 +80,8 @@ jobs:
           images: |
             ghcr.io/liquidity-pools-indexer
           tags: |
-            ${{env.DOCKER_REPO_TAGGED}}
+            ${{env.IMAGE_TAG}}
+            custom-ver
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository_owner }}/hyd-data-lake
             org.opencontainers.image.description=Hydration Liquidity Pools indexer image
@@ -92,7 +93,6 @@ jobs:
         with:
           context: ./indexers/liquidity-pools/
           push: true
-#          file: Dockerfile
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
             
