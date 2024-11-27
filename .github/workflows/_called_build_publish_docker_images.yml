@@ -23,9 +23,9 @@ jobs:
   build:
     name: "Build"
     runs-on: ubuntu-latest
-#    permissions:
-#      contents: read
-#      packages: write
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
 
@@ -52,18 +52,12 @@ jobs:
         with:
           driver-opts: network=host
 
-      - name: Debug
-        env:
-          MK_PERSONAL_TOKEN: ${{ secrets.MK_PERSONAL_TOKEN }}
-        run: |
-          echo "token - $MK_PERSONAL_TOKEN"
-
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.MK_PERSONAL_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set DOCKER_REPO_TAGGED based on branch or tag
         run: |
